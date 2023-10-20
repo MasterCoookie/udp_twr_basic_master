@@ -9,8 +9,7 @@ class Initiator:
         self.uwb_address = uwb_address
 
 class UDPSocket:
-    def __init__(self, port):
-        self.port = port
+    def __init__(self):
         self.bound_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.bound_socket.bind(('0.0.0.0', 12))
         self.bound_socket.settimeout(1)
@@ -31,21 +30,22 @@ if __name__ == "__main__":
     tag_a = Initiator("192.168.0.112", 7, "DD")
     tag_b = Initiator("192.168.0.113", 7, "EE")
     anchors = ("AA", "BB")
+    sckt = UDPSocket()
     for i in range(10):
-        time.sleep(0.1)
+        time.sleep(0.5)
         anchor = random.choice(anchors)
 
-        tag_a.bind_sckt()
-        tag_a.send(anchor)
-        tag_a.receive()
-        tag_a.receive()
-        tag_a.sckt.close()
+        print(f'Sending from {tag_a.uwb_address} to {anchor}')
+        sckt.send(anchor, tag_a.ip, tag_a.port)
+        sckt.receive()
+        sckt.receive()
 
-        time.sleep(0.1)
-
+        time.sleep(0.5)
         anchor = random.choice(anchors)
-        tag_b.bind_sckt()
-        tag_b.send(anchor)
-        tag_b.receive()
-        tag_b.receive()
-        tag_b.sckt.close()
+
+        print(f'Sending from {tag_b.uwb_address} to {anchor}')
+        sckt.send(anchor, tag_b.ip, tag_b.port)
+        sckt.receive()
+        sckt.receive()
+    
+    sckt.bound_socket.close()
