@@ -8,28 +8,31 @@ class Initiator:
         self.port = port
         self.uwb_address = uwb_address
 
+        self.sckt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sckt.bind(('0.0.0.0', 12))
+
     def send(self, message):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.bind(('0.0.0.0', 12))
-        s.sendto(message.encode(), (self.ip, self.port))
+        self.sckt.sendto(message.encode(), (self.ip, self.port))
+
+    def receive(self):
         try:
-            data = s.recv(1024)
+            data = self.sckt.recv(1024)
             print(data.decode())
-        except socket.error:
-            print("Error Occured.")
         except socket.timeout:
             print("Timeout Occured.")
-        s.close()
+        self.sckt.close()
 
 
 
 if __name__ == "__main__":
     tag_a = Initiator("192.168.0.112", 7, "DD")
-    tag_b = Initiator("192.168.0.113", 7, "EE")
+    # tag_b = Initiator("192.168.0.113", 7, "EE")
     anchors = ("AA", "BB")
-    for i in range(100):
+    for i in range(1):
+        time.sleep(0.1)
         anchor = random.choice(anchors)
         tag_a.send(anchor)
-        # print
-        anchor = random.choice(anchors)
-        tag_b.send(anchor)
+        tag_a.receive()
+        # time.sleep(0.1)
+        # anchor = random.choice(anchors)
+        # tag_b.send(anchor)
