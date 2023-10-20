@@ -8,17 +8,19 @@ class Initiator:
         self.port = port
         self.uwb_address = uwb_address
 
-    def bind_sckt(self):
-        self.sckt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sckt.bind(('0.0.0.0', 12))
-        self.sckt.settimeout(1)
+class UDPSocket:
+    def __init__(self, port):
+        self.port = port
+        self.bound_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.bound_socket.bind(('0.0.0.0', 12))
+        self.bound_socket.settimeout(1)
 
-    def send(self, message):
-        self.sckt.sendto(message.encode(), (self.ip, self.port))
+    def send(self, message, ip, port):
+        self.bound_socket.sendto(message.encode(), (ip, port))
 
     def receive(self):
         try:
-            data = self.sckt.recv(1024)
+            data = self.bound_socket.recv(1024)
             print(data.decode())
         except socket.timeout:
             print("Timeout Occured.")
