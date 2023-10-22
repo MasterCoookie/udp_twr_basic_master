@@ -13,7 +13,7 @@ class UDPSharedSocket:
         self.bound_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.bound_socket.bind(('0.0.0.0', out_port))
         self.bound_socket.settimeout(1)
-        self.results_buffer = [[]] * dvices_no
+        self.results_buffer = [[] for _ in range(dvices_no)]
 
     def send(self, message, ip, port, verbose=False):
         if verbose:
@@ -36,7 +36,7 @@ class UDPSharedSocket:
         for i, results in enumerate(self.results_buffer):
             with open(f'{file_prefix}_{i}.txt', 'w') as f:
                 for result in results:
-                    f.write(f'{result}\n')
+                    f.write(f'{result.strip()}\n')
 
 
 
