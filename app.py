@@ -25,41 +25,31 @@ class UDPSharedSocket:
             data = self.bound_socket.recv(1024)
             if verbose:
                 print(f'{result_pre} received {data.decode()}')
-            self.results_buffer[device_index].push(f'{result_pre} received {data.decode()}')
+            self.results_buffer[device_index].append(f'{result_pre} received {data.decode()}')
             
         except socket.timeout:
             if verbose:
                 print(f'{result_pre} timeout')
-            self.results_buffer[device_index].push(f'{result_pre} timeout')
+            self.results_buffer[device_index].append(f'{result_pre} timeout')
 
 
 
 if __name__ == "__main__":
     anchors = ("AA", "BB")
-    freq = 50
-    delay = 1/(freq/2)
 
     # tag_a = Initiator("192.168.0.112", 7, "DD", UDPSocket(12))
-    tag_b = Initiator("192.168.0.113", 7, "EE", UDPSocket(1547))
+    # tag_b = Initiator("192.168.0.113", 7, "EE", UDPSocket(1547))
+    tags = (Initiator("192.168.0.112", 7, "DD"), Initiator("192.168.0.113", 12, "EE"))
+    sckt = UDPSharedSocket(12, len(tags))
     start = time.time()
-    for i in range(100):
-        # time.sleep(1/freq)
-        anchor = random.choice(anchors)
-
-        # print(f'Sending from {tag_a.uwb_address} to {anchor}')
-        # tag_a.sckt.send(anchor, tag_a.ip, tag_a.port)
-        # tag_a.sckt.receive(tag_a.uwb_address)
-        # tag_a.sckt.receive(tag_a.uwb_address)
-
-        time.sleep(delay)
-        anchor = random.choice(anchors)
-
-        print(f'Sending from {tag_b.uwb_address} to {anchor}')
-        tag_b.sckt.send(anchor, tag_b.ip, tag_b.port)
-        tag_b.sckt.receive(tag_b.uwb_address)
-        tag_b.sckt.receive(tag_b.uwb_address)
+    for exchange_index in range(100):
+        for i, tag in enumerate(tags):
+            anchor = random.choice(anchors)
+            sckt.send(anchor, tag.ip, tag.port, True)
+            sckt.receive(f'#{exchange_index}. {tag.uwb_address} to {anchor}', i, True)
+            sckt.receive(f'#{exchange_index}. {tag.uwb_address} to {anchor}', i, True)
+    
+    sckt.bound_socket.close()
     
     end = time.time() - start
     print(f'Time elapsed: {end}')
-    tag_a.sckt.bound_socket.close()
-    tag_b.sckt.bound_socket.close()
