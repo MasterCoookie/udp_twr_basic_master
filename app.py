@@ -8,25 +8,6 @@ class Initiator:
         self.port = port
         self.uwb_address = uwb_address
 
-# class UDPSocket:
-#     def __init__(self, out_port):
-#         self.bound_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#         self.bound_socket.bind(('0.0.0.0', out_port))
-#         self.bound_socket.settimeout(1)
-#         # open file
-#         self.file = open(f'data_{out_port}.txt', "w+")
-
-#     def send(self, message, ip, port):
-#         self.bound_socket.sendto(message.encode(), (ip, port))
-
-#     def receive(self, uwb_address):
-#         try:
-#             data = self.bound_socket.recv(1024)
-#             # print(data.decode())
-#             self.file.write(f'{uwb_address}: {data.decode()}')
-#         except socket.timeout:
-#             self.file.write(f'{uwb_address}: Timeout\n')
-
 class UDPSharedSocket:
     def __init__(self, out_port, dvices_no):
         self.bound_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -39,6 +20,17 @@ class UDPSharedSocket:
             print(f'Sending {message} to {ip}:{port}')
         self.bound_socket.sendto(message.encode(), (ip, port))
 
+    def receive(self, result_pre, device_index, verbose=False):
+        try:
+            data = self.bound_socket.recv(1024)
+            if verbose:
+                print(f'{result_pre} received {data.decode()}')
+            self.results_buffer[device_index].push(f'{result_pre} received {data.decode()}')
+            
+        except socket.timeout:
+            if verbose:
+                print(f'{result_pre} timeout')
+            self.results_buffer[device_index].push(f'{result_pre} timeout')
 
 
 
